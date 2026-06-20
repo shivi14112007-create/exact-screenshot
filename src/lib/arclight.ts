@@ -455,6 +455,9 @@ export const resilienceActions: ResilienceAction[] = [
     title: "Regional cloud redundancy",
     detail: "Add GCP as secondary cloud; replicate state across two regions.",
     difficulty: "Medium",
+    impact: "High",
+    scoreIncrease: 18,
+    rationale: "Eliminates the AWS single-cloud SPOF for stateful services.",
     apply: (eco) => {
       let next = addNode(
         eco,
