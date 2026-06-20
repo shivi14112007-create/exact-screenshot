@@ -9,38 +9,153 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppTimelineRouteImport } from './routes/_app.timeline'
+import { Route as AppSimulationRouteImport } from './routes/_app.simulation'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
+import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppGraphRouteImport } from './routes/_app.graph'
+import { Route as AppEcosystemRouteImport } from './routes/_app.ecosystem'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTimelineRoute = AppTimelineRouteImport.update({
+  id: '/timeline',
+  path: '/timeline',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSimulationRoute = AppSimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGraphRoute = AppGraphRouteImport.update({
+  id: '/graph',
+  path: '/graph',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEcosystemRoute = AppEcosystemRouteImport.update({
+  id: '/ecosystem',
+  path: '/ecosystem',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/ecosystem': typeof AppEcosystemRoute
+  '/graph': typeof AppGraphRoute
+  '/reports': typeof AppReportsRoute
+  '/settings': typeof AppSettingsRoute
+  '/simulation': typeof AppSimulationRoute
+  '/timeline': typeof AppTimelineRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/analytics': typeof AppAnalyticsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/ecosystem': typeof AppEcosystemRoute
+  '/graph': typeof AppGraphRoute
+  '/reports': typeof AppReportsRoute
+  '/settings': typeof AppSettingsRoute
+  '/simulation': typeof AppSimulationRoute
+  '/timeline': typeof AppTimelineRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/ecosystem': typeof AppEcosystemRoute
+  '/_app/graph': typeof AppGraphRoute
+  '/_app/reports': typeof AppReportsRoute
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/simulation': typeof AppSimulationRoute
+  '/_app/timeline': typeof AppTimelineRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/ecosystem'
+    | '/graph'
+    | '/reports'
+    | '/settings'
+    | '/simulation'
+    | '/timeline'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/analytics'
+    | '/dashboard'
+    | '/ecosystem'
+    | '/graph'
+    | '/reports'
+    | '/settings'
+    | '/simulation'
+    | '/timeline'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/analytics'
+    | '/_app/dashboard'
+    | '/_app/ecosystem'
+    | '/_app/graph'
+    | '/_app/reports'
+    | '/_app/settings'
+    | '/_app/simulation'
+    | '/_app/timeline'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +163,93 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/timeline': {
+      id: '/_app/timeline'
+      path: '/timeline'
+      fullPath: '/timeline'
+      preLoaderRoute: typeof AppTimelineRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/simulation': {
+      id: '/_app/simulation'
+      path: '/simulation'
+      fullPath: '/simulation'
+      preLoaderRoute: typeof AppSimulationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/graph': {
+      id: '/_app/graph'
+      path: '/graph'
+      fullPath: '/graph'
+      preLoaderRoute: typeof AppGraphRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ecosystem': {
+      id: '/_app/ecosystem'
+      path: '/ecosystem'
+      fullPath: '/ecosystem'
+      preLoaderRoute: typeof AppEcosystemRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/analytics': {
+      id: '/_app/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AppAnalyticsRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppEcosystemRoute: typeof AppEcosystemRoute
+  AppGraphRoute: typeof AppGraphRoute
+  AppReportsRoute: typeof AppReportsRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppSimulationRoute: typeof AppSimulationRoute
+  AppTimelineRoute: typeof AppTimelineRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppAnalyticsRoute: AppAnalyticsRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppEcosystemRoute: AppEcosystemRoute,
+  AppGraphRoute: AppGraphRoute,
+  AppReportsRoute: AppReportsRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppSimulationRoute: AppSimulationRoute,
+  AppTimelineRoute: AppTimelineRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
