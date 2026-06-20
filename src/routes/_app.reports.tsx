@@ -44,24 +44,19 @@ function ReportsPage() {
   const sov = useMemo(() => computeSovereignty(ecosystem), [ecosystem]);
   const top = sov.breakdown[0];
 
-  // Resilience plan: project each action's impact independently
-  const projections = useMemo(
-    () =>
-      resilienceActions
-        .map((a) => projectAction(ecosystem, a.id)!)
-        .filter(Boolean),
-    [ecosystem],
-  );
-
   const [appliedSet, setAppliedSet] = useState<Set<string>>(new Set());
-  const stackedSov = useMemo(() => {
-    let eco = ecosystem;
-    for (const id of appliedSet) {
-      const a = resilienceActions.find((x) => x.id === id);
-      if (a) eco = a.apply(eco);
-    }
-    return computeSovereignty(eco);
-  }, [ecosystem, appliedSet]);
+  const selectedActions = useMemo(
+    () => resilienceActions.filter((a) => appliedSet.has(a.id)),
+    [appliedSet],
+  );
+  const totalIncrease = selectedActions.reduce((sum, a) => sum + a.scoreIncrease, 0);
+  const projectedScore = Math.max(0, Math.min(100, sov.score + totalIncrease));
+  const projectedRisk: "Low" | "Medium" | "High" =
+    projectedScore >= 70 ? "Low" : projectedScore >= 45 ? "Medium" : "High";
+  const improvementPct = sov.score > 0
+    ? Math.round(((projectedScore - sov.score) / sov.score) * 100)
+    : 0;
+
 
   const exportBriefing = () => {
     const md = generateReport(ecosystem, sov, shock);
