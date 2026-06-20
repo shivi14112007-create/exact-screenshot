@@ -6,7 +6,6 @@ import { useArclight } from "@/lib/arclight-store";
 import {
   computeSovereignty,
   generateReport,
-  projectAction,
   relTime,
   resilienceActions,
 } from "@/lib/arclight";
