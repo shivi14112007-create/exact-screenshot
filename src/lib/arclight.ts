@@ -392,6 +392,9 @@ export interface ResilienceAction {
   title: string;
   detail: string;
   difficulty: "Easy" | "Medium" | "High";
+  impact: "Low" | "Medium" | "High";
+  scoreIncrease: number;
+  rationale: string;
   apply: (eco: Ecosystem) => Ecosystem;
 }
 
@@ -408,6 +411,9 @@ export const resilienceActions: ResilienceAction[] = [
     title: "Add Gemini as backup model",
     detail: "Route OpenAI-dependent workflows through Gemini as failover.",
     difficulty: "Easy",
+    impact: "High",
+    scoreIncrease: 22,
+    rationale: "Halves single-vendor concentration on the most-used AI provider.",
     apply: (eco) => {
       let next = addNode(
         eco,
@@ -427,6 +433,9 @@ export const resilienceActions: ResilienceAction[] = [
     title: "Deploy local LLM",
     detail: "Self-hosted model for critical workflows; reduces vendor dependency.",
     difficulty: "High",
+    impact: "High",
+    scoreIncrease: 15,
+    rationale: "Removes external dependency for the two highest-criticality workflows.",
     apply: (eco) => {
       let next = addNode(
         eco,
@@ -446,6 +455,9 @@ export const resilienceActions: ResilienceAction[] = [
     title: "Regional cloud redundancy",
     detail: "Add GCP as secondary cloud; replicate state across two regions.",
     difficulty: "Medium",
+    impact: "High",
+    scoreIncrease: 18,
+    rationale: "Eliminates the AWS single-cloud SPOF for stateful services.",
     apply: (eco) => {
       let next = addNode(
         eco,
@@ -465,6 +477,9 @@ export const resilienceActions: ResilienceAction[] = [
     title: "Multi-region database replication",
     detail: "Postgres replicas across regions; failover under 90s.",
     difficulty: "Medium",
+    impact: "Medium",
+    scoreIncrease: 10,
+    rationale: "Adds redundancy to the primary datastore, cutting RPO/RTO.",
     apply: (eco) => {
       return addNode(
         eco,

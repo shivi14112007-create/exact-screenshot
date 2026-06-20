@@ -6,7 +6,6 @@ import { useArclight } from "@/lib/arclight-store";
 import {
   computeSovereignty,
   generateReport,
-  projectAction,
   relTime,
   resilienceActions,
 } from "@/lib/arclight";
@@ -44,24 +43,19 @@ function ReportsPage() {
   const sov = useMemo(() => computeSovereignty(ecosystem), [ecosystem]);
   const top = sov.breakdown[0];
 
-  // Resilience plan: project each action's impact independently
-  const projections = useMemo(
-    () =>
-      resilienceActions
-        .map((a) => projectAction(ecosystem, a.id)!)
-        .filter(Boolean),
-    [ecosystem],
-  );
-
   const [appliedSet, setAppliedSet] = useState<Set<string>>(new Set());
-  const stackedSov = useMemo(() => {
-    let eco = ecosystem;
-    for (const id of appliedSet) {
-      const a = resilienceActions.find((x) => x.id === id);
-      if (a) eco = a.apply(eco);
-    }
-    return computeSovereignty(eco);
-  }, [ecosystem, appliedSet]);
+  const selectedActions = useMemo(
+    () => resilienceActions.filter((a) => appliedSet.has(a.id)),
+    [appliedSet],
+  );
+  const totalIncrease = selectedActions.reduce((sum, a) => sum + a.scoreIncrease, 0);
+  const projectedScore = Math.max(0, Math.min(100, sov.score + totalIncrease));
+  const projectedRisk: "Low" | "Medium" | "High" =
+    projectedScore >= 70 ? "Low" : projectedScore >= 45 ? "Medium" : "High";
+  const improvementPct = sov.score > 0
+    ? Math.round(((projectedScore - sov.score) / sov.score) * 100)
+    : 0;
+
 
   const exportBriefing = () => {
     const md = generateReport(ecosystem, sov, shock);
@@ -145,7 +139,7 @@ function ReportsPage() {
           The largest structural risk is provider concentration on{" "}
           <span className="text-foreground font-medium">{top?.provider ?? "OpenAI"}</span>, carrying {top?.pct ?? 0}% of cross-workflow exposure.
           Executing the top mitigations queued below projects the index to{" "}
-          <span className="text-foreground font-medium">{stackedSov.score}</span>.
+          <span className="text-foreground font-medium">{projectedScore}</span>.
         </p>
       </div>
 
@@ -184,7 +178,7 @@ function ReportsPage() {
             <ShieldCheck size={16} className="text-[color:var(--success)]" />
             <h3 className="text-sm font-medium">Resilience Plan</h3>
             <span className="text-[10px] font-mono tracking-widest text-muted-foreground">
-              {appliedSet.size} OF {projections.length} STACKED
+              {appliedSet.size} OF {resilienceActions.length} SELECTED
             </span>
           </div>
           <Link
@@ -195,38 +189,136 @@ function ReportsPage() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-[1fr_1fr_1fr] gap-4 mb-4 items-center">
+        <div className="grid md:grid-cols-[1fr_auto_1fr_1fr] gap-4 mb-4 items-center">
           <ScoreBlock label="Current Score" score={sov.score} risk={sov.risk} />
           <div className="flex items-center justify-center text-muted-foreground">
             <ChevronRight size={24} />
           </div>
           <ScoreBlock
             label="Projected Score"
-            score={stackedSov.score}
-            risk={stackedSov.risk}
-            delta={stackedSov.score - sov.score}
+            score={projectedScore}
+            risk={projectedRisk}
+            delta={projectedScore - sov.score}
           />
+          <div className="rounded-lg border border-[color:var(--panel-border)] p-4 text-center">
+            <div className="text-[10px] font-mono tracking-[0.18em] text-muted-foreground">
+              IMPROVEMENT
+            </div>
+            <div
+              className="text-4xl font-semibold mt-1 tabular-nums"
+              style={{ color: improvementPct >= 0 ? "var(--success)" : "var(--danger)" }}
+            >
+              {improvementPct >= 0 ? "+" : ""}{improvementPct}%
+            </div>
+            <div className="text-[10px] font-mono tracking-widest text-muted-foreground mt-2">
+              {totalIncrease >= 0 ? "+" : ""}{totalIncrease} POINTS
+            </div>
+          </div>
         </div>
 
+        {/* Timeline visualization */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between text-[10px] font-mono tracking-[0.18em] text-muted-foreground mb-1.5">
+            <span>SOVEREIGNTY TIMELINE</span>
+            <span>0 → 100</span>
+          </div>
+          <div className="relative h-3 rounded-full bg-[oklch(0.28_0.03_260)] overflow-hidden">
+            <motion.div
+              className="absolute inset-y-0 left-0"
+              initial={false}
+              animate={{ width: `${sov.score}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              style={{ background: "color-mix(in oklab, var(--muted-foreground) 60%, transparent)" }}
+            />
+            <motion.div
+              className="absolute inset-y-0"
+              initial={false}
+              animate={{ left: `${sov.score}%`, width: `${Math.max(0, projectedScore - sov.score)}%` }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              style={{
+                background: "linear-gradient(90deg, var(--primary), var(--success))",
+                boxShadow: "0 0 14px var(--primary)",
+              }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-px h-5 bg-[color:var(--success)]"
+              style={{ left: `${projectedScore}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-[10px] font-mono text-muted-foreground mt-1.5">
+            <span>Current: <span className="text-foreground">{sov.score}</span></span>
+            <span>Projected: <span className="text-[color:var(--success)]">{projectedScore}</span></span>
+          </div>
+        </div>
+
+        {/* Breakdown */}
+        {selectedActions.length > 0 && (
+          <div className="rounded-lg border border-[color:var(--panel-border)] p-4 mb-4 bg-[oklch(0.20_0.025_260)]/40">
+            <div className="text-[10px] font-mono tracking-[0.18em] text-muted-foreground mb-2">
+              SCORE BREAKDOWN
+            </div>
+            <div className="space-y-1 font-mono text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Current Score</span>
+                <span className="tabular-nums">{sov.score}</span>
+              </div>
+              {selectedActions.map((a) => (
+                <div key={a.id} className="flex justify-between">
+                  <span className="text-muted-foreground">+ {a.title}</span>
+                  <span className="tabular-nums text-[color:var(--success)]">+{a.scoreIncrease}</span>
+                </div>
+              ))}
+              <div className="flex justify-between border-t border-[color:var(--panel-border)] pt-1.5 mt-1.5">
+                <span className="font-semibold text-foreground">Projected Score</span>
+                <span className="tabular-nums font-semibold neon-text">{projectedScore}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Explanation panel */}
+        {selectedActions.length > 0 && (
+          <div className="rounded-lg border border-[color:var(--primary)]/40 bg-[color:var(--primary)]/8 p-4 mb-4">
+            <div className="flex items-start gap-2">
+              <Info size={14} className="text-[color:var(--primary)] mt-0.5 shrink-0" />
+              <div>
+                <div className="text-xs font-semibold text-foreground mb-1">
+                  Why the projected score increased
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Projected score increased because dependency concentration decreased and
+                  redundancy improved. {selectedActions.map((a) => a.rationale).join(" ")}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Recommendations */}
         <div className="space-y-2">
-          {projections.map((p) => {
-            const applied = appliedSet.has(p.action.id);
-            const delta = p.sovereignty.score - sov.score;
+          {resilienceActions.map((a) => {
+            const applied = appliedSet.has(a.id);
             const diffColor =
-              p.action.difficulty === "Easy"
+              a.difficulty === "Easy"
                 ? "var(--success)"
-                : p.action.difficulty === "Medium"
+                : a.difficulty === "Medium"
                   ? "var(--warning)"
                   : "var(--danger)";
+            const impactColor =
+              a.impact === "High"
+                ? "var(--primary)"
+                : a.impact === "Medium"
+                  ? "var(--cyan)"
+                  : "var(--muted-foreground)";
             return (
               <motion.button
-                key={p.action.id}
+                key={a.id}
                 whileHover={{ x: 2 }}
                 onClick={() =>
                   setAppliedSet((cur) => {
                     const next = new Set(cur);
-                    if (next.has(p.action.id)) next.delete(p.action.id);
-                    else next.add(p.action.id);
+                    if (next.has(a.id)) next.delete(a.id);
+                    else next.add(a.id);
                     return next;
                   })
                 }
@@ -246,8 +338,17 @@ function ReportsPage() {
                   {applied && <span className="w-1.5 h-1.5 rounded-sm bg-background" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium flex items-center gap-2">
-                    {p.action.title}
+                  <div className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                    {a.title}
+                    <span
+                      className="text-[9px] font-mono tracking-widest px-1.5 py-0.5 rounded-sm"
+                      style={{
+                        color: impactColor,
+                        background: `color-mix(in oklab, ${impactColor} 14%, transparent)`,
+                      }}
+                    >
+                      IMPACT · {a.impact.toUpperCase()}
+                    </span>
                     <span
                       className="text-[9px] font-mono tracking-widest px-1.5 py-0.5 rounded-sm"
                       style={{
@@ -255,20 +356,15 @@ function ReportsPage() {
                         background: `color-mix(in oklab, ${diffColor} 14%, transparent)`,
                       }}
                     >
-                      {p.action.difficulty.toUpperCase()}
+                      DIFFICULTY · {a.difficulty.toUpperCase()}
                     </span>
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-0.5">{p.action.detail}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">{a.detail}</div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-[10px] font-mono text-muted-foreground">PROJECTED</div>
-                  <div className="text-sm font-semibold tabular-nums">
-                    {p.sovereignty.score}
-                    <span
-                      className={`ml-1 text-[10px] font-mono ${delta >= 0 ? "text-[color:var(--success)]" : "text-[color:var(--danger)]"}`}
-                    >
-                      ({delta >= 0 ? "+" : ""}{delta})
-                    </span>
+                  <div className="text-[10px] font-mono text-muted-foreground">SCORE</div>
+                  <div className="text-sm font-semibold tabular-nums text-[color:var(--success)]">
+                    +{a.scoreIncrease}
                   </div>
                 </div>
               </motion.button>
@@ -276,6 +372,7 @@ function ReportsPage() {
           })}
         </div>
       </div>
+
 
       <div className="panel p-5">
         <h3 className="text-sm font-medium mb-3">Report History</h3>
