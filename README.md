@@ -1,4 +1,4 @@
-# 🚀 Arclight
+#  Arclight
 
 ## AI Dependency Intelligence & Resilience Platform
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 📌 Overview
+##  Overview
 
 Organizations increasingly rely on AI models, cloud providers, databases, and external APIs to power critical business workflows.
 
@@ -23,7 +23,7 @@ However, most organizations cannot answer:
 
 ---
 
-## 🎯 Problem Statement
+##  Problem Statement
 
 AI adoption is growing rapidly across enterprises, governments, financial institutions, and critical infrastructure.
 
@@ -45,9 +45,9 @@ This creates significant operational, regulatory, and business continuity risks.
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
-### 🕸 Dependency Mapping
+###  Dependency Mapping
 
 Visualize relationships between:
 
@@ -59,7 +59,7 @@ Visualize relationships between:
 
 ---
 
-### 📊 Sovereignty Assessment
+###  Sovereignty Assessment
 
 Generate:
 
@@ -70,7 +70,7 @@ Generate:
 
 ---
 
-### ⚡ Shock Simulation
+###  Shock Simulation
 
 Simulate real-world disruption scenarios:
 
@@ -82,7 +82,7 @@ Simulate real-world disruption scenarios:
 
 ---
 
-### 🛡 Resilience Planning
+###  Resilience Planning
 
 Receive actionable recommendations:
 
@@ -94,7 +94,7 @@ Receive actionable recommendations:
 
 ---
 
-## 🏗 How Arclight Works
+##  How Arclight Works
 
 ```text
 AI Ecosystem Input
